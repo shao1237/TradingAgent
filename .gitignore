@@ -217,3 +217,9 @@ __marimo__/
 
 # Cache
 **/data_cache/
+
+# Taiwan stock integration — generated outputs
+reports/
+*_report.md
+*_result.txt
+run_2367.py

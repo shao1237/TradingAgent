@@ -27,6 +27,14 @@ from .alpha_vantage_common import AlphaVantageRateLimitError
 # Configuration and routing logic
 from .config import get_config
 
+from .tw_fundamentals import get_tw_fundamentals
+from .tw_news import get_tw_news, get_cnyes_stock_news
+from .tw_sentiment import analyze_tw_sentiment
+
+def is_tw_stock(ticker: str) -> bool:
+    return isinstance(ticker, str) and (ticker.endswith(".TW") or ticker.endswith(".TWO"))
+
+
 # Tools organized by category
 TOOLS_CATEGORIES = {
     "core_stock_apis": {
@@ -133,6 +141,13 @@ def get_vendor(category: str, method: str = None) -> str:
 
 def route_to_vendor(method: str, *args, **kwargs):
     """Route method calls to appropriate vendor implementation with fallback support."""
+    # Custom routing for TW stocks
+    if args and isinstance(args[0], str) and is_tw_stock(args[0]):
+        if method == "get_fundamentals":
+            return get_tw_fundamentals(args[0])
+        elif method == "get_news":
+            return get_tw_news(args[0], **kwargs)
+
     category = get_category_for_method(method)
     vendor_config = get_vendor(category, method)
     primary_vendors = [v.strip() for v in vendor_config.split(',')]
