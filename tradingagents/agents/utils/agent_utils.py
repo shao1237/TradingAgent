@@ -1,3 +1,6 @@
+# Modified by shao1237 on 2026-07-07 to support Taiwan stocks analysis.
+# This file is subject to the terms and conditions defined in the Apache License 2.0.
+
 import functools
 import logging
 from collections.abc import Mapping
@@ -95,8 +98,25 @@ def resolve_instrument_identity(ticker: str) -> dict:
     """
     from tradingagents.dataflows.symbol_utils import normalize_symbol
 
+    normalized = normalize_symbol(ticker)
+    if normalized.endswith(".TW") or normalized.endswith(".TWO"):
+        try:
+            from tradingagents.dataflows.tw_fundamentals import resolve_tw_name
+            identity = resolve_tw_name(normalized)
+            if identity:
+                result = {
+                    "company_name": identity.get("company_name"),
+                    "sector": identity.get("sector"),
+                    "industry": identity.get("industry"),
+                    "exchange": identity.get("exchange"),
+                    "quote_type": "EQUITY"
+                }
+                return {k: v for k, v in result.items() if v is not None}
+        except Exception as exc:
+            logger.debug("Could not resolve TW identity for %s: %s", ticker, exc)
+
     try:
-        info = yf.Ticker(normalize_symbol(ticker)).info or {}
+        info = yf.Ticker(normalized).info or {}
     except Exception as exc:  # noqa: BLE001 — fail open, never block the run
         logger.debug("Could not resolve instrument identity for %s: %s", ticker, exc)
         return {}

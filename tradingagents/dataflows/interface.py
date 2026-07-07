@@ -1,3 +1,6 @@
+# Modified by shao1237 on 2026-07-07 to support Taiwan stocks analysis.
+# This file is subject to the terms and conditions defined in the Apache License 2.0.
+
 import logging
 
 from .alpha_vantage import (
@@ -167,6 +170,15 @@ def get_vendor(category: str, method: str = None) -> str:
 
 def route_to_vendor(method: str, *args, **kwargs):
     """Route method calls to appropriate vendor implementation with fallback support."""
+    # Custom routing for TW stocks
+    if args and isinstance(args[0], str) and (args[0].endswith(".TW") or args[0].endswith(".TWO")):
+        if method == "get_fundamentals":
+            from .tw_fundamentals import get_tw_fundamentals
+            return get_tw_fundamentals(args[0])
+        elif method == "get_news":
+            from .tw_news import get_tw_news
+            return get_tw_news(args[0], **kwargs)
+
     category = get_category_for_method(method)
     vendor_config = get_vendor(category, method)
     primary_vendors = [v.strip() for v in vendor_config.split(',')]
