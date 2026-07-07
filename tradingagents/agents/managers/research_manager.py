@@ -20,6 +20,12 @@ def create_research_manager(llm):
         instrument_context = get_instrument_context_from_state(state)
         history = state["investment_debate_state"].get("history", "")
 
+        # 注入原始分析報告作為客觀事實參考
+        market_report = state.get("market_report", "")
+        sentiment_report = state.get("sentiment_report", "")
+        news_report = state.get("news_report", "")
+        fundamentals_report = state.get("fundamentals_report", "")
+
         investment_debate_state = state["investment_debate_state"]
 
         prompt = f"""As the Research Manager and debate facilitator, your role is to critically evaluate this round of debate and deliver a clear, actionable investment plan for the trader.
@@ -36,6 +42,16 @@ def create_research_manager(llm):
 - **Sell**: Strong conviction in the bear thesis; recommend exiting or avoiding the position
 
 Commit to a clear stance whenever the debate's strongest arguments warrant one; reserve Hold for situations where the evidence on both sides is genuinely balanced.
+
+**IMPORTANT**: Do not let rhetorical strength alone determine your rating. Cross-reference the debaters' claims against the original analyst data below. If forward-looking metrics (forward P/E, projected EPS, revenue growth) tell a different story from trailing metrics (trailing P/E), give appropriate weight to the forward outlook.
+
+---
+
+**Original Analyst Reports (objective reference):**
+- Technical/Market: {market_report[:500] if market_report else 'N/A'}
+- Sentiment: {sentiment_report[:500] if sentiment_report else 'N/A'}
+- News: {news_report[:500] if news_report else 'N/A'}
+- Fundamentals: {fundamentals_report[:500] if fundamentals_report else 'N/A'}
 
 ---
 

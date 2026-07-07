@@ -222,3 +222,7 @@ __marimo__/
 .env.enterprise
 reports/
 scratch/
+# Taiwan stock integration — generated outputs
+*_report.md
+*_result.txt
+run_2367.py
