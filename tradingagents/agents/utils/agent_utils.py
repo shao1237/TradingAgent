@@ -62,6 +62,7 @@ def get_language_instruction() -> str:
     report rather than a mix of languages.
     """
     from tradingagents.dataflows.config import get_config
+
     lang = get_config().get("output_language", "English")
     if lang.strip().lower() == "english":
         return ""
@@ -102,6 +103,7 @@ def resolve_instrument_identity(ticker: str) -> dict:
     if normalized.endswith(".TW") or normalized.endswith(".TWO"):
         try:
             from tradingagents.dataflows.tw_fundamentals import resolve_tw_name
+
             identity = resolve_tw_name(normalized)
             if identity:
                 result = {
@@ -109,7 +111,7 @@ def resolve_instrument_identity(ticker: str) -> dict:
                     "sector": identity.get("sector"),
                     "industry": identity.get("industry"),
                     "exchange": identity.get("exchange"),
-                    "quote_type": "EQUITY"
+                    "quote_type": "EQUITY",
                 }
                 return {k: v for k, v in result.items() if v is not None}
         except Exception as exc:
@@ -232,6 +234,3 @@ def create_msg_delete():
         return {"messages": removal_operations + [placeholder]}
 
     return delete_messages
-
-
-

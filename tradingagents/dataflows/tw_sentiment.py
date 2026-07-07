@@ -7,6 +7,7 @@ from transformers import pipeline
 # 推薦: "ckiplab/bert-base-chinese-ws" 或 "lxyuan/distilbert-base-multilingual-cased-sentiments-student"
 _sentiment_pipe = None
 
+
 def get_sentiment_pipeline():
     global _sentiment_pipe
     if _sentiment_pipe is None:
@@ -16,6 +17,7 @@ def get_sentiment_pipeline():
             top_k=1,
         )
     return _sentiment_pipe
+
 
 def analyze_tw_sentiment(texts: list[str]) -> float:
     """

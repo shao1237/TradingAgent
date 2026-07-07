@@ -9,10 +9,11 @@
 """
 
 import re
-import yfinance as yf
-import requests
-from .tw_sentiment import analyze_tw_sentiment
 
+import requests
+import yfinance as yf
+
+from .tw_sentiment import analyze_tw_sentiment
 
 # ──────────────────────────────────────────────
 #  yfinance 取得公司中文名稱 (用於搜尋關鍵字)

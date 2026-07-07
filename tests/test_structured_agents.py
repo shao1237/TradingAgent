@@ -202,8 +202,7 @@ class TestTraderAgent:
 
     def test_falls_back_to_freetext_when_structured_unavailable(self):
         plain_response = (
-            "**Action**: Sell\n\nGuidance cut hits margins.\n\n"
-            "FINAL TRANSACTION PROPOSAL: **SELL**"
+            "**Action**: Sell\n\nGuidance cut hits margins.\n\nFINAL TRANSACTION PROPOSAL: **SELL**"
         )
         llm = MagicMock()
         llm.with_structured_output.side_effect = NotImplementedError("provider unsupported")
@@ -240,9 +239,7 @@ def _structured_rm_llm(captured: dict, plan: ResearchPlan | None = None):
             strategic_actions="Hold current position; reassess after earnings.",
         )
     structured = MagicMock()
-    structured.invoke.side_effect = lambda prompt: (
-        captured.__setitem__("prompt", prompt) or plan
-    )
+    structured.invoke.side_effect = lambda prompt: captured.__setitem__("prompt", prompt) or plan
     llm = MagicMock()
     llm.with_structured_output.return_value = structured
     return llm
@@ -276,7 +273,9 @@ class TestResearchManagerAgent:
             assert f"**{tier}**" in prompt, f"missing {tier} in prompt"
 
     def test_falls_back_to_freetext_when_structured_unavailable(self):
-        plain_response = "**Recommendation**: Sell\n\n**Rationale**: ...\n\n**Strategic Actions**: ..."
+        plain_response = (
+            "**Recommendation**: Sell\n\n**Rationale**: ...\n\n**Strategic Actions**: ..."
+        )
         llm = MagicMock()
         llm.with_structured_output.side_effect = NotImplementedError("provider unsupported")
         llm.invoke.return_value = MagicMock(content=plain_response)
@@ -325,16 +324,20 @@ class TestRenderSentimentReport:
     def test_all_six_bands_render(self):
         for band in SentimentBand:
             report = SentimentReport(
-                overall_band=band, overall_score=5.0,
-                confidence="medium", narrative="n",
+                overall_band=band,
+                overall_score=5.0,
+                confidence="medium",
+                narrative="n",
             )
             assert band.value in render_sentiment_report(report)
 
     def test_score_out_of_range_rejected(self):
         with pytest.raises(ValidationError):
             SentimentReport(
-                overall_band=SentimentBand.BULLISH, overall_score=11.0,
-                confidence="high", narrative="n",
+                overall_band=SentimentBand.BULLISH,
+                overall_score=11.0,
+                confidence="high",
+                narrative="n",
             )
 
 
@@ -352,14 +355,13 @@ def _structured_sentiment_llm(captured: dict, report: SentimentReport | None = N
     a real SentimentReport so render_sentiment_report works."""
     if report is None:
         report = SentimentReport(
-            overall_band=SentimentBand.BULLISH, overall_score=7.5,
+            overall_band=SentimentBand.BULLISH,
+            overall_score=7.5,
             confidence="high",
             narrative="StockTwits 75% bullish. News constructive. Reddit upbeat.",
         )
     structured = MagicMock()
-    structured.invoke.side_effect = lambda prompt: (
-        captured.__setitem__("prompt", prompt) or report
-    )
+    structured.invoke.side_effect = lambda prompt: captured.__setitem__("prompt", prompt) or report
     llm = MagicMock()
     llm.with_structured_output.return_value = structured
     return llm
@@ -370,8 +372,10 @@ class TestSentimentAnalystAgent:
     def test_structured_path_produces_rendered_markdown(self):
         captured = {}
         report = SentimentReport(
-            overall_band=SentimentBand.MILDLY_BEARISH, overall_score=4.0,
-            confidence="medium", narrative="Mixed signals across sources.",
+            overall_band=SentimentBand.MILDLY_BEARISH,
+            overall_score=4.0,
+            confidence="medium",
+            narrative="Mixed signals across sources.",
         )
         analyst = create_sentiment_analyst(_structured_sentiment_llm(captured, report))
         sr = analyst(_make_sentiment_state())["sentiment_report"]
